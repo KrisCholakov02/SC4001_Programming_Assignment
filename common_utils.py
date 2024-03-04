@@ -83,6 +83,29 @@ def intialise_loaders(X_train_scaled, y_train, X_test_scaled, y_test, batch_size
     test_dataloader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True)
     return train_dataloader, test_dataloader
 
+
+# Custom function to split the dataset for K-Fold Cross Validation, first split then fit the label encoder to the training set and transform the test set
+def kfold_split_dataset(df, columns_to_drop, test_size, random_state):
+    # Split the dataset into training and testing datasets
+    df_train, df_test = train_test_split(df, test_size=test_size, random_state=random_state)
+
+    # Define the label encoder
+    label_encoder = preprocessing.LabelEncoder()
+
+    # Fit and transform the training set, transform the test set
+    df_train['label'] = label_encoder.fit_transform(df_train['label'])
+    df_test['label'] = label_encoder.transform(df_test['label'])
+
+    # Drop the columns from the training and testing datasets
+    df_train2 = df_train.drop(columns_to_drop, axis=1)
+    y_train2 = df_train['label'].to_numpy()
+
+    # Drop the columns from the training and testing datasets
+    df_test2 = df_test.drop(columns_to_drop, axis=1)
+    y_test2 = df_test['label'].to_numpy()
+
+    return df_train2, y_train2, df_test2, y_test2
+
 def split_dataset(df, columns_to_drop, test_size, random_state):
     label_encoder = preprocessing.LabelEncoder()
 
@@ -97,6 +120,13 @@ def split_dataset(df, columns_to_drop, test_size, random_state):
     y_test2 = df_test['label'].to_numpy() 
 
     return df_train2, y_train2, df_test2, y_test2
+
+# Custom function to preprocess the dataset for K-Fold Cross Validation
+def kfold_preprocess(df):
+    drop_columns = ['filename', 'label']  # Columns to be dropped from the dataframe
+    X_train, y_train, X_test, y_test = kfold_split_dataset(df, drop_columns, test_size=0.25, random_state=0)  # Split the dataset with test_size=0.25 to achieve 75:25 train-test ratio
+    X_train_scaled, X_test_scaled = preprocess_dataset(X_train, X_test)  # Scale the input features
+    return X_train_scaled, y_train, X_test_scaled, y_test
 
 def preprocess_dataset(df_train, df_test):
 
