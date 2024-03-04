@@ -22,6 +22,30 @@ from sklearn.metrics import f1_score, precision_score, recall_score, confusion_m
 
 loss_fn = nn.BCELoss()
 
+
+# Define the custom class to create the MLP with various number of layers and neurons in the hidden layers
+class Custom_MLP(nn.Module):
+    def __init__(self, no_features, no_hidden, no_labels):
+        super().__init__()
+        layers = []
+        for i in range(len(no_hidden)):
+            # Add linear layer from input to hidden layer
+            layers.append(nn.Linear(no_features if i == 0 else no_hidden[i - 1], no_hidden[i]))
+            # Add ReLU activation function
+            layers.append(nn.ReLU())
+            # Add dropout layer
+            layers.append(nn.Dropout(p=0.2))
+        # Add output layer
+        layers.append(nn.Linear(no_hidden[-1], no_labels))
+        layers.append(nn.Sigmoid())  # Sigmoid activation function for binary classification
+
+        self.mlp_stack = nn.Sequential(*layers)
+
+    def forward(self, x):
+        # Pass the input tensor through the layers
+        return self.mlp_stack(x)
+
+
 class MLP(nn.Module):
 
     def __init__(self, no_features, no_hidden, no_labels):
