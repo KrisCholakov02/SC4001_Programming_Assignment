@@ -149,8 +149,8 @@ def split_dataset(df, columns_to_drop, test_size, random_state):
 def kfold_preprocess(df):
     drop_columns = ['filename', 'label']  # Columns to be dropped from the dataframe
     X_train, y_train, X_test, y_test = kfold_split_dataset(df, drop_columns, test_size=0.25, random_state=0)  # Split the dataset with test_size=0.25 to achieve 75:25 train-test ratio
-    X_train_scaled, X_test_scaled = preprocess_dataset(X_train, X_test)  # Scale the input features
-    return X_train_scaled, y_train, X_test_scaled, y_test
+    # Skip the scaling step as we will scale the datasets based on the new training set in the function generate_cv_folds_for_batch_sizes
+    return X_train, y_train, X_test, y_test
 
 def preprocess_dataset(df_train, df_test):
 
